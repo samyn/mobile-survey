@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f9da6">
+  <title>问题性手机使用问卷（简版）</title>
+  <style>
+    :root {
+      --brand: #0f9da6;
+      --brand-dark: #08777e;
+      --brand-soft: #e8f7f7;
+      --ink: #173042;
+      --muted: #607483;
+      --line: #dbe5e8;
+      --surface: #ffffff;
+      --page: #f4f8f9;
+      --danger: #c2413b;
+      --shadow: 0 12px 35px rgba(15, 61, 72, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(15, 157, 166, 0.12), transparent 26rem),
+        var(--page);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+    }
+
+    button, input { font: inherit; }
+
+    .progress-shell {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), #41c4b8);
+      transition: width 180ms ease;
+    }
+
+    main {
+      width: min(860px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 72px;
+    }
+
+    .hero {
+      padding: 34px;
+      border: 1px solid rgba(15, 157, 166, 0.18);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: var(--brand-dark);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--brand);
+      box-shadow: 0 0 0 5px var(--brand-soft);
+    }
+
+    h1 {
+      margin: 0;
+      color: #0b7f87;
+      font-size: clamp(28px, 5vw, 44px);
+      line-height: 1.18;
+      letter-spacing: -.025em;
+    }
+
+    .intro {
+      margin: 18px 0 0;
+      color: #3e5664;
+      font-size: 17px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .pill {
+      padding: 7px 11px;
+      border-radius: 999px;
+      color: var(--brand-dark);
+      background: var(--brand-soft);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin: 28px 4px 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    #answeredCount { font-weight: 700; color: var(--brand-dark); }
+
+    form { display: grid; gap: 16px; }
+
+    fieldset {
+      min-width: 0;
+      margin: 0;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: 0 5px 18px rgba(15, 61, 72, 0.045);
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    fieldset:focus-within {
+      border-color: rgba(15, 157, 166, .7);
+      box-shadow: 0 8px 24px rgba(15, 157, 166, .10);
+    }
+
+    fieldset.unanswered {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(194, 65, 59, .10);
+      animation: nudge 220ms ease-in-out 2;
+    }
+
+    @keyframes nudge {
+      50% { transform: translateX(4px); }
+    }
+
+    legend {
+      width: 100%;
+      padding: 0;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.55;
+    }
+
+    .q-number {
+      display: inline-grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      margin-right: 9px;
+      border-radius: 9px;
+      color: #fff;
+      background: var(--brand);
+      font-size: 14px;
+      vertical-align: 1px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .option { position: relative; }
+
+    .option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .option label {
+      display: grid;
+      place-items: center;
+      min-height: 54px;
+      padding: 10px 8px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: #435d6c;
+      background: #fbfdfd;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: 140ms ease;
+    }
+
+    .option label:hover { border-color: var(--brand); background: var(--brand-soft); }
+
+    .option input:focus-visible + label {
+      outline: 3px solid rgba(15, 157, 166, .24);
+      outline-offset: 2px;
+    }
+
+    .option input:checked + label {
+      border-color: var(--brand);
+      color: #fff;
+      background: var(--brand);
+      box-shadow: 0 6px 16px rgba(15, 157, 166, .22);
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      min-height: 50px;
+      padding: 11px 22px;
+      border: 0;
+      border-radius: 13px;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .btn-primary {
+      flex: 1;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      box-shadow: 0 8px 20px rgba(15, 157, 166, .22);
+    }
+
+    .btn-secondary { color: #38515f; background: #e9eff1; }
+
+    .result {
+      display: none;
+      margin-top: 22px;
+      padding: 30px;
+      border: 1px solid rgba(15, 157, 166, .28);
+      border-radius: 20px;
+      background: linear-gradient(145deg, #fff, var(--brand-soft));
+      box-shadow: var(--shadow);
+    }
+
+    .result.show { display: block; }
+
+    .score-row {
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+      margin: 4px 0 12px;
+    }
+
+    .score {
+      color: var(--brand-dark);
+      font-size: 58px;
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+
+    .score-max { color: var(--muted); font-size: 18px; }
+
+    .score-track {
+      height: 12px;
+      overflow: hidden;
+      margin: 18px 0;
+      border-radius: 999px;
+      background: #dce8ea;
+    }
+
+    .score-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #41c4b8, #0f9da6, #ef8f55);
+      transition: width 500ms cubic-bezier(.2,.75,.3,1);
+    }
+
+    .note {
+      margin: 0;
+      color: #425b69;
+    }
+
+    .privacy {
+      margin: 18px 2px 0;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .error {
+      display: none;
+      margin: 0 0 4px;
+      padding: 12px 14px;
+      border-radius: 11px;
+      color: #8f2f2a;
+      background: #fff0ef;
+      font-weight: 650;
+    }
+
+    .error.show { display: block; }
+
+    @media (max-width: 640px) {
+      main { width: min(100% - 20px, 860px); padding: 22px 0 44px; }
+      .hero { padding: 23px 20px; border-radius: 18px; }
+      h1 { font-size: 28px; }
+      .intro { font-size: 15px; }
+      .status-row { margin-top: 20px; }
+      fieldset { padding: 19px 15px; border-radius: 15px; }
+      legend { font-size: 15px; }
+      .options { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .option label { min-height: 48px; font-size: 14px; }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; min-height: 48px; }
+      .result { padding: 24px 20px; }
+    }
+
+    @media print {
+      .progress-shell, .actions, .privacy { display: none !important; }
+      body { background: #fff; }
+      main { width: 100%; padding: 0; }
+      .hero, fieldset, .result { box-shadow: none; break-inside: avoid; }
+      fieldset { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-shell" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+  <main>
+    <section class="hero" aria-labelledby="pageTitle">
+      <div class="eyebrow">自我评估 · 15 题</div>
+      <h1 id="pageTitle">问题性手机使用问卷</h1>
+      <p class="intro">依据你的手机使用实际情况，选择最符合自身的选项。不同选项分值不同，答题后自动计算总分（15–60 分）；分数越高，手机问题使用倾向越突出。</p>
+      <div class="meta" aria-label="问卷信息">
+        <span class="pill">约 2–3 分钟</span>
+        <span class="pill">所有题目必答</span>
+        <span class="pill">答案仅保存在当前页面</span>
+      </div>
+    </section>
+
+    <div class="status-row" aria-live="polite">
+      <span id="answeredCount">已完成 0 / 15</span>
+      <span>请选择最贴近实际情况的一项</span>
+    </div>
+
+    <form id="surveyForm" novalidate>
+      <div class="error" id="errorMessage" role="alert">还有题目未作答，已为你定位到第一题漏答。</div>
+      <div id="questions"></div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">查看结果</button>
+        <button class="btn btn-secondary" type="button" id="resetButton">重新填写</button>
+      </div>
+    </form>
+
+    <section class="result" id="result" aria-live="polite" tabindex="-1">
+      <div class="eyebrow">你的问卷结果</div>
+      <div class="score-row">
+        <span class="score" id="score">0</span>
+        <span class="score-max">/ 60 分</span>
+      </div>
+      <div class="score-track" aria-hidden="true"><div class="score-fill" id="scoreFill"></div></div>
+      <p class="note" id="resultText"></p>
+      <p class="note" style="margin-top:10px;font-size:14px">本问卷用于自我了解，原图未提供分数分级或诊断标准，因此页面不会自行划分等级，也不能替代专业评估。</p>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" id="printButton">打印／保存结果</button>
+        <button class="btn btn-secondary" type="button" id="editButton">返回修改</button>
+      </div>
+    </section>
+
+    <p class="privacy">隐私说明：本页面不连接服务器，不会上传或保存你的答案。</p>
+  </main>
+
+  <script>
+    const labels = ["非常同意", "同意", "不同意", "非常不同意"];
+    const questions = [
+      { text: "对我来说，坚持一整天不使用手机很容易。", scores: [1, 2, 3, 4] },
+      { text: "我过马路时会使用手机（或：我开车／骑车时使用手机）。", scores: [4, 3, 2, 1] },
+      { text: "在明确规定禁止使用手机的场合，我不会使用手机。", scores: [1, 2, 3, 4] },
+      { text: "当想用手机时，我很难控制自己不去使用。", scores: [4, 3, 2, 1] },
+      { text: "在通过车流密集的主干道或十字路口时，我会尽量避免使用手机。", scores: [1, 2, 3, 4] },
+      { text: "在图书馆等需要安静的场所，我不会使用手机。", scores: [1, 2, 3, 4] },
+      { text: "没有手机，我也能正常生活。", scores: [1, 2, 3, 4] },
+      { text: "即使身处危险情境，我依然会使用手机。", scores: [4, 3, 2, 1] },
+      { text: "我会在禁止使用手机的场所使用手机。", scores: [4, 3, 2, 1] },
+      { text: "离开手机会让我感到心神不宁。", scores: [4, 3, 2, 1] },
+      { text: "我会因为边过马路边看手机（或边开车／骑车边看手机）而陷入危险状况。", scores: [4, 3, 2, 1] },
+      { text: "在公共交通工具上使用手机时，我会尽量压低说话音量。", scores: [1, 2, 3, 4] },
+      { text: "对我来说，关掉手机是一件很困难的事。", scores: [4, 3, 2, 1] },
+      { text: "即使是在需要高度集中注意力的复杂路况下（如过马路／骑行／开车），我也会使用手机。", scores: [4, 3, 2, 1] },
+      { text: "我会尽量避免在需要安静的场合使用手机。", scores: [1, 2, 3, 4] }
+    ];
+
+    const questionRoot = document.querySelector("#questions");
+    const form = document.querySelector("#surveyForm");
+    const answeredCount = document.querySelector("#answeredCount");
+    const progressBar = document.querySelector("#progressBar");
+    const errorMessage = document.querySelector("#errorMessage");
+    const result = document.querySelector("#result");
+
+    function renderQuestions() {
+      questionRoot.innerHTML = questions.map((question, index) => `
+        <fieldset data-question="${index + 1}">
+          <legend><span class="q-number">${index + 1}</span>${question.text}</legend>
+          <div class="options">
+            ${labels.map((label, optionIndex) => `
+              <div class="option">
+                <input id="q${index + 1}-${optionIndex}" type="radio" name="q${index + 1}" value="${question.scores[optionIndex]}">
+                <label for="q${index + 1}-${optionIndex}">${label}</label>
+              </div>
+            `).join("")}
+          </div>
+        </fieldset>
+      `).join("");
+    }
+
+    function updateProgress() {
+      const answered = new Set([...new FormData(form).keys()].filter(key => key.startsWith("q"))).size;
+      answeredCount.textContent = `已完成 ${answered} / ${questions.length}`;
+      progressBar.style.width = `${answered / questions.length * 100}%`;
+      document.querySelectorAll("fieldset.unanswered").forEach(fieldset => {
+        const name = `q${fieldset.dataset.question}`;
+        if (form.elements[name].value) fieldset.classList.remove("unanswered");
+      });
+      if (answered === questions.length) errorMessage.classList.remove("show");
+    }
+
+    function resetSurvey() {
+      form.reset();
+      result.classList.remove("show");
+      errorMessage.classList.remove("show");
+      document.querySelectorAll("fieldset").forEach(fieldset => fieldset.classList.remove("unanswered"));
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    renderQuestions();
+    form.addEventListener("change", updateProgress);
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const missing = [];
+      let score = 0;
+
+      questions.forEach((_, index) => {
+        const fieldset = document.querySelector(`[data-question="${index + 1}"]`);
+        const selected = form.querySelector(`input[name="q${index + 1}"]:checked`);
+        fieldset.classList.toggle("unanswered", !selected);
+        if (!selected) missing.push(fieldset);
+        else score += Number(selected.value);
+      });
+
+      if (missing.length) {
+        errorMessage.classList.add("show");
+        missing[0].scrollIntoView({ behavior: "smooth", block: "center" });
+        missing[0].querySelector("input").focus({ preventScroll: true });
+        return;
+      }
+
+      errorMessage.classList.remove("show");
+      document.querySelector("#score").textContent = score;
+      document.querySelector("#scoreFill").style.width = `${(score - 15) / 45 * 100}%`;
+      document.querySelector("#resultText").textContent = `你的总分是 ${score} 分。问卷可得分范围为 15–60 分；分数越高，表示手机问题使用倾向越突出。`;
+      result.classList.add("show");
+      result.focus({ preventScroll: true });
+      result.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.querySelector("#resetButton").addEventListener("click", resetSurvey);
+    document.querySelector("#editButton").addEventListener("click", () => {
+      document.querySelector("fieldset").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    document.querySelector("#printButton").addEventListener("click", () => window.print());
+  </script>
+</body>
+</html>
